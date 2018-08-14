@@ -286,7 +286,7 @@ Here are plots from various times in the time series.
 We see that the change point detection algorithm detects approximately
 when there are three distinct loops. Note that in this case, we only
 used 1-dimensional homology, so it would not be able to detect changes
-in clusters.
+in clusters. \href{http://stat.slu.edu/~speegle/Circles2.gif}{Link here}
 
 \begin{center}\includegraphics{springer_template_files/figure-latex/chunk_7_5-1} \end{center}
 
@@ -315,14 +315,27 @@ taken on that day. We then used edge detection to extract edges from the
 pictures, and we removed the time stamp. Finally, we randomly sampled
 points from the detected edges of the pictures to use as our point
 cloud. So, the time series consists of randomly sampled points from
-edges of the average of all pictures on 128 consecutive days.
+edges of the average of all pictures on 64 consecutive days. The
+original averaged images are
+\href{http://stat.slu.edu/~speegle/Kaapstad.gif}{here} and the sampled
+edges are \href{http://stat.slu.edu/~speegle/Slide4.gif}{here}
 
-In the next, we have a series of images of a cell, which divides at time
-\(t = 23\). We use the \texttt{cannyEdges} function in the
-\texttt{imager} R package to detect the edges of the cells. We then
-randomly sample 200 points from the detected edges at each time stamp to
-form our time series of point clouds. We then applied the change point
-detection algorithm to obtain the results below.
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_8-1} \end{center}
+
+In this case, there is one bootstrap significant index of time
+\(t = 63\). However, it is unlikely that this is a significant change
+point; more likely is that the extension of the time series in required
+by \texttt{cpbaywave} caused the issue.
+
+In the next, we have a series of images of a cell, which divides at
+about time \(t = 23\)
+\href{http://stat.slu.edu/~speegle/cellsRaw.gif}{link here}. We use the
+\texttt{cannyEdges} function in the \texttt{imager} R package to detect
+the edges of the cells. We then randomly sample 200 points from the
+detected edges at each time stamp to form our time series of point
+clouds \href{http://stat.slu.edu/~speegle/mycells2.gif}{see results}. We
+then applied the change point detection algorithm to obtain the results
+below.
 
 Here are sample images from before and after the splitting of the cell,
 together with samples from the detected edges.
