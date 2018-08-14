@@ -375,7 +375,7 @@ dists <- t(dists)
 pp <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE)
 ```
 
-We see that the change point detection algorithm detects approximately when there are three distinct loops. Note that in this case, we only used 1-dimensional homology, so it would not be able to detect changes in clusters.
+We see that the change point detection algorithm detects approximately when there are three distinct loops. Note that in this case, we only used 1-dimensional homology, so it would not be able to detect changes in clusters. [Link here](http://stat.slu.edu/~speegle/two_circles.gif)
 
 ```{r chunk_7_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
 pp$plot
@@ -425,7 +425,7 @@ knitr::kable(df1, longtable = T, booktabs = T,
 
 Next, we have two examples of time series of images. In the first example, we examine the Archive of Many Outdoor Scenes. We picked a camera that was taking pictures of Table Mountain from Bloubergstrand in South Africa. For each day, we averaged all of the pictures that were taken on that day. We then used edge detection to extract edges from the pictures, and we removed the time stamp. Finally, we randomly sampled points from the detected edges of the pictures to use as our point cloud. So, the time series consists of randomly sampled points from edges of the average of all pictures on 128 consecutive days. 
 
-In the next, we have a series of images of a cell, which divides at time $t = 23$. We use the \texttt{cannyEdges} function in the \texttt{imager} R package to detect the edges of the cells. We then randomly sample 200 points from the detected edges at each time stamp to form our time series of point clouds. We then applied the change point detection algorithm to obtain the results below.
+In the next, we have a series of images of a cell, which divides at about time $t = 23$ [link here](http://stat.slu.edu/~speegle/cellsRaw.gif). We use the \texttt{cannyEdges} function in the \texttt{imager} R package to detect the edges of the cells. We then randomly sample 200 points from the detected edges at each time stamp to form our time series of point clouds [see results](http://stat/slu.edu/~speegle/mycells2.gif). We then applied the change point detection algorithm to obtain the results below.
 
 ```{r chunk_9, echo = FALSE, eval = FALSE}
 set.seed(07042017)
