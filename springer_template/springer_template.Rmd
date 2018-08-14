@@ -30,6 +30,20 @@ preamble:
   \makeatletter
   \def\BState{\State\hskip-\ALG@thistlm}
   \makeatother
+  \usepackage{booktabs}
+  \usepackage{longtable}
+  \usepackage{array}
+  \usepackage{multirow}
+  \usepackage[table]{xcolor}
+  \usepackage{wrapfig}
+  \usepackage{float}
+  \usepackage{colortbl}
+  \usepackage{pdflscape}
+  \usepackage{tabu}
+  \usepackage{threeparttable}
+  \usepackage{threeparttablex}
+  \usepackage[normalem]{ulem}
+  \usepackage{makecell}
 
 #PACS: 
 #- PAC1
@@ -51,7 +65,7 @@ output: rticles::springer_article
 
 A simple change point detection problem is the following: suppose that $(x_t)_{t = 1}^{t_0}$ are iid Gaussian random variables with mean $\mu_0$ and variance $\sigma$, and $(x_t)_{t = t_0 + 1}^N$ are iid Gaussian with mean $\mu_1$ and variance $\sigma$. The goal is to determine whether $\mu_0 = \mu_1$, and if not, then what the value of $t_0$ is. 
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", message = FALSE}
+```{r chunk_1, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", message = FALSE}
 set.seed(1)
 dat <- data.frame(t = 1:64, y = c(rnorm(30), rnorm(34, 2, 1)))
 library(ggplot2)
@@ -97,13 +111,14 @@ Once the metric space valued time series is transformed into a multi-dimensional
 Suppose that the time series lives in $\mathbb {R}^M$ for some $M$. For example, we could have a time series of length 128 in 100 dimensional data, with a change point at time $t = 80$. We consider two examples in this case; in both examples, the data has mean zero in all dimensions until time 80. In the first case, it has mean 0.1 in all dimensions from dimension 81 through 128 and in the second case it has mean 1 and all dimensions from dimension 81 through 128.
 
 In the case that the mean increases to 0.1, the algorithm is not able to locate the change point, and incorrectly determines that there is no change. In the case that the mean increases to 1, the algorithm strongly indicates that the change point is at time $t = 80.
-```{r, echo = FALSE}
+```{r chunk_2, echo = FALSE, cache = TRUE}
 set.seed(8092018)
 dd <- function(x,y) {
   sum((x-y)^2)^1/2
 }
 library(cpbaywave)
 ts <- matrix(c(rnorm(80*100), rnorm(48*100,0.1)), nrow = 100, byrow = FALSE) 
+raw_change_point1 <- bootJLDetectChangePoint(t(ts), rotate_xaxis = TRUE, returnPlot = TRUE)
 dists_1 <- matrix(rep(0, 12800), nrow = 100)
 for(i in 1:100) {
   coord <- sample(128, 2)
@@ -117,6 +132,7 @@ for(i in 1:100) {
 dists_1 <- t(dists_1)
 
 ts <- matrix(c(rnorm(80*100), rnorm(48*100,1)), nrow = 100, byrow = FALSE) 
+raw_change_one <- bootJLDetectChangePoint(t(ts), rotate_xaxis = TRUE, returnPlot = TRUE)
 dists_2 <- matrix(rep(0, 12800), nrow = 100)
 for(i in 1:100) {
   coord <- sample(128, 2)
@@ -132,14 +148,40 @@ dists_2 <- t(dists_2)
 
 ```
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
-cpbaywave::bootJLDetectChangePoint(dists_1)$sigindices
+```{r chunk_2_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+change_of_point1 <- cpbaywave::bootJLDetectChangePoint(dists_1, rotate_xaxis = TRUE, returnPlot = TRUE)
 ```
 
-Note that in this case, the only time that is above the bootstrap significant bar is time $t = 1$. 
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
-cpbaywave::bootJLDetectChangePoint(dists_2)$sigindices
+```{r chunk_3, echo = FALSE, message=FALSE, fig.height = 3, fig.width = 5, fig.align = "center",  cache = TRUE}
+library(cowplot)
+p <- plot_grid(raw_change_point1$plot, change_of_point1$plot, labels = c("A", "B"), align = "h") 
+title <- ggdraw() + draw_label("Most Likely Indices of Change Points")
+plot_grid(title, p, ncol = 1, rel_heights = c(0.1,1))
+```
+
+
+```{r chunk_4, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+change_of_one <- cpbaywave::bootJLDetectChangePoint(dists_2, returnPlot = TRUE, rotate_xaxis = TRUE)
+```
+
+The following plot indicates that a change point is detected in both the original and the transformed data at time $t = 80$. 
+
+```{r chunk_4_5, echo = FALSE, message=FALSE, fig.height = 3, fig.width = 5, fig.align = "center",  cache = TRUE}
+library(cowplot)
+p <- plot_grid(raw_change_one$plot, change_of_one$plot, labels = c("A", "B"), align = "h") 
+title <- ggdraw() + draw_label("Most Likely Indices of Change Points")
+plot_grid(title, p, ncol = 1, rel_heights = c(0.1,1))
+library(kableExtra)
+df1 <-  as.data.frame(change_of_one$sigindices, stringsAsFactors = FALSE)
+df1 <- rbind(df1, c(" ", " "))
+df2 <- as.data.frame(raw_change_one$sigindices, stringsAsFactors = FALSE)
+
+df_kable <- dplyr::mutate(df2, Index2 = df1[,1], Freq2 = df1[,2]) 
+knitr::kable(df_kable, longtable = T, booktabs = T, 
+             caption = "Indices which are significant, together with their frequency.",
+             col.names = c("Index", "Freq", "Index" ,"Freq")) %>% 
+   add_header_above(c("Raw Data" = 2, "Transformed Data" = 2))
 ```
 
 This picture gives a typical strong indication that there is a change point at or near time $t = 80$, which we know is the correct value.
@@ -148,14 +190,15 @@ We note here that the \texttt{cpbaywave} algorithm also fails to detect a change
 \end{example}
 
 
-Next, we consider an example that isn't locally Euclidean, but we apply our algorithm to it anyway.
+Next, we consider the same change point scenario as above, but we imagine the time series living in $\ell_{100}^4$ rather than in $\ell_{100}^2$. 
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
 dd_2 <- function(x,y) {
   sum((x-y)^4)^1/4
 }
 
 ts <- matrix(c(rnorm(80*100), rnorm(48*100,1)), nrow = 100, byrow = FALSE) 
+raw_change_one <- bootJLDetectChangePoint(t(ts), rotate_xaxis = TRUE, returnPlot = TRUE)
 dists_3 <- matrix(rep(0, 12800), nrow = 100)
 for(i in 1:100) {
   coord <- sample(128, 2)
@@ -168,11 +211,35 @@ for(i in 1:100) {
 }
 dists_3 <- t(dists_3)
 
-bootJLDetectChangePoint(dists_3)$sigindices
+change_one <- bootJLDetectChangePoint(dists_3, rotate_xaxis = TRUE, returnPlot = TRUE)
 
 ```
 
-In this example, we see a drop in performance associated with the change in metric space. Nonetheless, the algorithm is still easily able to detect the change point at time $t = 80$. 
+```{r chunk_5_5, echo = FALSE, message=FALSE, fig.height = 3, fig.width = 5, fig.align = "center",  cache = TRUE}
+library(cowplot)
+p <- plot_grid(raw_change_one$plot, change_one$plot, labels = c("A", "B"), align = "h") 
+title <- ggdraw() + draw_label("Most Likely Indices of Change Points")
+plot_grid(title, p, ncol = 1, rel_heights = c(0.1,1))
+```
+
+
+```{r chunk_5_75, echo = FALSE, message = FALSE, cache = TRUE}
+df1 <-  as.data.frame(change_one$sigindices, stringsAsFactors = FALSE)
+
+df2 <- as.data.frame(raw_change_one$sigindices, stringsAsFactors = FALSE)
+if(nrow(df2) > nrow(df1)) 
+  df1 <- rbind(df1, rep(c(" ", " "), nrow(df2) - nrow(df1)))
+if(nrow(df1) > nrow(df2))
+  df2 <- rbind(df2, rep(c(" ", " "), nrow(df1) - nrow(df2)))
+
+df_kable <- dplyr::mutate(df2, Index2 = df1[,1], Freq2 = df1[,2]) 
+knitr::kable(df_kable, longtable = T, booktabs = T, 
+             caption = "Indices which are significant, together with their frequency.",
+             col.names = c("Index", "Freq", "Index" ,"Freq")) %>% 
+   add_header_above(c("Raw Data" = 2, "Transformed Data" = 2))
+```
+
+The algorithm is still easily able to detect the change point at time $t = 80$, and in fact, does so better than the algorithm applied directly to the unstranformed data.
 
 <!-- Text with citations by @Galyardt14mmm, [@Mislevy06Cog]. -->
 
@@ -201,7 +268,7 @@ The space of persistence diagrams is not locally isometric to Euclidean space. H
 
 Our first example is a proof of concept. We start with a single circle, sampled randomly, and then at time $t = 80$, we add a second disjoint circle. Any good change point detection algorithm based on persistence diagrams should be able to find such a change. Here are two plots of typical point clouds in $\mathbb{R}^2$.
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+```{r chunk_6, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
 library(TDA)
 library(cpbaywave)
 library(dplyr)
@@ -221,8 +288,13 @@ Circles2 <- lapply(81:128, function(x) {
 
 
 Circles <- c(Circles, Circles2)
-plot(Circles[[1]])
-plot(Circles[[81]])
+df <- data.frame(rbind(Circles[[1]], Circles[[81]]))
+df <- mutate(df, c = c(rep("time 1", 60), rep("time 81", 120)))
+names(df) <- c("x", "y", "circle")
+ggplot(df, aes(x = x, y = y)) +
+  geom_point() +
+  facet_wrap(~circle) +
+  coord_equal()
 
 Diags <- lapply(1:128, function(i) ripsDiag(X = Circles[[i]],
                                            maxdimension,
@@ -241,9 +313,23 @@ for(i in 1:128) {
   }
 }
 dists <- t(dists)
-bootJLDetectChangePoint(dists)$sigindices
+p <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE)
 
 
+```
+
+The change point detection algorithm easily detects the change:
+```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+p$plot
+```
+
+```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+df1 <-  as.data.frame(p$sigindices, stringsAsFactors = FALSE)
+
+
+knitr::kable(df1, longtable = T, booktabs = T, 
+             caption = "Indices which are significant, together with their frequency.",
+             col.names = c("Index", "Freq")) 
 ```
 
 
@@ -251,7 +337,7 @@ Next, we consider two circles which start out being disjoint, but one of the two
 
 Here are plots from various times in the time series.
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_7, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
 Circles <- lapply(1:64, function(x) {
 Circle1 <- circleUnif(60, r = 2) + rnorm(120,0,.15);
 Circle2 <- circleUnif(100, r = 4) + 2.375 + 4*(64 - x)/64 + rnorm(200,0,.15);
@@ -259,9 +345,14 @@ Circle2 <- circleUnif(100, r = 4) + 2.375 + 4*(64 - x)/64 + rnorm(200,0,.15);
 #unifNose <- NULL
 rbind(Circle1, Circle2);})
 
-plot(Circles[[1]])
-plot(Circles[[40]])
-plot(Circles[[50]])
+df <- data.frame(rbind(Circles[[1]], Circles[[40]], Circles[[50]]))
+df <- mutate(df, circle = c(rep("time 1", 160),rep("time 40", 160), rep("time 50", 160)))
+names(df) <- c("x", "y", "circle")
+ggplot(df, aes(x,y)) + 
+  geom_point(size = 0.5) +
+  facet_wrap(~circle) +
+  coord_equal()
+  
 
 N <- 64
 Diags <- lapply(1:N, function(i) ripsDiag(X = Circles[[i]],
@@ -280,80 +371,98 @@ for(i in 1:N) {
     dists[i,j] <- (wasserstein(A, Diags[[j]][[1]], p = 1)^2 - wasserstein(B, Diags[[j]][[1]], p = 1)^2)/den
   }
 }
-dists <- t(dists)
-bootJLDetectChangePoint(dists)$sigindices
+dists <- t(dists) 
+pp <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE)
 ```
+
+We see that the change point detection algorithm detects approximately when there are three distinct loops. Note that in this case, we only used 1-dimensional homology, so it would not be able to detect changes in clusters.
+
+```{r chunk_7_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+pp$plot
+```
+
+```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+df1 <-  as.data.frame(pp$sigindices, stringsAsFactors = FALSE)
+
+
+knitr::kable(df1, longtable = T, booktabs = T, 
+             caption = "Indices which are significant, together with their frequency.",
+             col.names = c("Index", "Freq")) 
+```
+
 
 <!-- The computation of Wasserstein distance between persistence diagrams can take quite some time when using zero dimensional homology, so we reduce to only taking 5 random pairs rather than 64 in the next computation. For that reason, we also do not bootstrap the significant indices, but rather we simply use Bayes Information Criteria, which we have found to be somewhat unreliable for data generated in this way. -->
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, eval = FALSE}
-Circles <- lapply(1:64, function(x) {
-Circle1 <- circleUnif(30, r = 2) + rnorm(30,0,.15);
-Circle2 <- circleUnif(50, r = 4) + 2.375 + 4*(64 - x)/64 + rnorm(50,0,.15);
-#unifNose <- matrix(runif(20, -2, 10), ncol = 2)
-#unifNose <- NULL
-rbind(Circle1, Circle2);})
-
-N <- 64
-Diags <- lapply(1:N, function(i) ripsDiag(X = Circles[[i]],
-                                           maxdimension,
-                                           maxscale,
-                                           library = "GUDHI",
-                                           printProgress = FALSE) )
-N <- 5
-dists <- matrix(1:(5*64), ncol = 64)
-for(i in 1:N) {
-  coord <- sample(64, 2)
-  A <- Diags[[coord[1]]][[1]]
-  B <- Diags[[coord[2]]][[1]]
-  den <- wasserstein(A, B, p = 1, dimension = 0)
-  for(j in 1:64) {
-    dists[i,j] <- (wasserstein(A, Diags[[j]][[1]], p = 1, dimension = 0)^2 - wasserstein(B, Diags[[j]][[1]], p = 1, dimension = 0)^2)/den
-  }
-}
-dists <- t(dists)
-detectChangePoint(dists)
-bootJLDetectChangePoint(dists)$sigindices
+```{r chunk_8, echo = FALSE, eval = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, eval = FALSE}
+# Circles <- lapply(1:64, function(x) {
+# Circle1 <- circleUnif(30, r = 2) + rnorm(30,0,.15);
+# Circle2 <- circleUnif(50, r = 4) + 2.375 + 4*(64 - x)/64 + rnorm(50,0,.15);
+# #unifNose <- matrix(runif(20, -2, 10), ncol = 2)
+# #unifNose <- NULL
+# rbind(Circle1, Circle2);})
+# 
+# N <- 64
+# Diags <- lapply(1:N, function(i) ripsDiag(X = Circles[[i]],
+#                                            maxdimension,
+#                                            maxscale,
+#                                            library = "GUDHI",
+#                                            printProgress = FALSE) )
+# N <- 5
+# dists <- matrix(1:(5*64), ncol = 64)
+# for(i in 1:N) {
+#   coord <- sample(64, 2)
+#   A <- Diags[[coord[1]]][[1]]
+#   B <- Diags[[coord[2]]][[1]]
+#   den <- wasserstein(A, B, p = 1, dimension = 0)
+#   for(j in 1:64) {
+#     dists[i,j] <- (wasserstein(A, Diags[[j]][[1]], p = 1, dimension = 0)^2 - wasserstein(B, Diags[[j]][[1]], p = 1, dimension = 0)^2)/den
+#   }
+# }
+# dists <- t(dists) 
+# detectChangePoint(dists)
+# bootJLDetectChangePoint(dists, rotate_xaxis = TRUE)$sigindices
 ```
 
 Next, we have two examples of time series of images. In the first example, we examine the Archive of Many Outdoor Scenes. We picked a camera that was taking pictures of Table Mountain from Bloubergstrand in South Africa. For each day, we averaged all of the pictures that were taken on that day. We then used edge detection to extract edges from the pictures, and we removed the time stamp. Finally, we randomly sampled points from the detected edges of the pictures to use as our point cloud. So, the time series consists of randomly sampled points from edges of the average of all pictures on 128 consecutive days. 
 
 In the next, we have a series of images of a cell, which divides at time $t = 23$. We use the \texttt{cannyEdges} function in the \texttt{imager} R package to detect the edges of the cells. We then randomly sample 200 points from the detected edges at each time stamp to form our time series of point clouds. We then applied the change point detection algorithm to obtain the results below.
 
-```{r echo = FALSE, eval = FALSE}
+```{r chunk_9, echo = FALSE, eval = FALSE}
 set.seed(07042017)
+library(png)
+library(imager)
 circs <- list(0)
 listLen <- 64
 alpha1 <- .7
 startPoint <- 1
 for(i in  startPoint :(startPoint + listLen - 1)) {
-if(i < 10) {
-im <- readPNG(paste0("/Users/speegled/Downloads/E00/Frame00", i, ".png"))
-}
-if(i >= 10 && i < 100) {
-im <- readPNG(paste0("/Users/speegled/Downloads/E00/Frame0", i, ".png"))
-}
-if(i >= 100) {
-im <- readPNG(paste0("/Users/speegled/Downloads/E00/Frame", i, ".png"))
-}
-im <- im[100:400,]
-im <- as.cimg(im)
-#alpha1 <- findAlpha(im, .004, alpha1)
-alpha1 <- 1
-im <- cannyEdges(im, alpha = alpha1)
-im2 <- which(im, arr.ind = TRUE)
-myRows <- sample(nrow(im2), 200)
-#myRows <- 1:nrow(im2)
-plot(im2[myRows, 1:2], main = as.character(i))
-circs[[length(circs) + 1]] <- im2[myRows,1:2]
+  if(i < 10) {
+    im <- png::readPNG(paste0("/Users/speegled/Downloads/E00/Frame00", i, ".png"))
+  }
+  if(i >= 10 && i < 100) {
+    im <- png::readPNG(paste0("/Users/speegled/Downloads/E00/Frame0", i, ".png"))
+  }
+  if(i >= 100) {
+    im <- png::readPNG(paste0("/Users/speegled/Downloads/E00/Frame", i, ".png"))
+  }
+  im <- im[100:400,]
+  im <- as.cimg(im)
+  #alpha1 <- findAlpha(im, .004, alpha1)
+  alpha1 <- 1
+  im <- cannyEdges(im, alpha = alpha1)
+  im2 <- which(im, arr.ind = TRUE)
+  myRows <- sample(nrow(im2), 200)
+  #myRows <- 1:nrow(im2)
+  plot(im2[myRows, 1:2], main = as.character(i))
+  circs[[length(circs) + 1]] <- im2[myRows,1:2]
 }
 circs[[1]] <- NULL
 for(i in 1:listLen)
-circs[[i]] <- circs[[i]]/480
+  circs[[i]] <- circs[[i]]/480
 save(circs, file = "circleData.dat")
 ```
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_10, echo = FALSE, eval = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
 load("circleData.dat")
 Circles <- circs
 N <- 64
@@ -375,9 +484,70 @@ for(i in 1:N) {
   }
 }
 dists <- t(dists)
-bootJLDetectChangePoint(dists)$sigindices
+p <- bootJLDetectChangePoint(dists, returnPlot = TRUE, rotate_xaxis = TRUE)
+save(list = c("circs", "dists", "p"), file = "circleData2.dat")
+```
+
+Here are sample images from before and after the splitting of the cell, together with samples from the detected edges.
+```{r chunk_10_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message=FALSE}
+i <- 1
+   library(grid)
+library(imager)
+im <- png::readPNG(paste0("/Users/speegled/Downloads/E00/Frame00", i, ".png"))
+  im <- im[100:400,]
+im <- as.cimg(im)
+g <- rasterGrob(im, interpolate=TRUE) 
+p1 <- ggplot() + annotation_custom(g)+ theme_minimal()
+
+im <- cannyEdges(im, alpha = 1)
+im2 <- which(im, arr.ind = TRUE)
+im2[,2] <- 500 - im2[,2]
+myRows <- sample(nrow(im2), 200)
+#myRows <- 1:nrow(im2)
+im2 <- as.data.frame(im2)
+p2 <- ggplot(im2, aes(x = dim1, y = dim2)) + geom_point() + theme_minimal() + scale_y_continuous(limits = c(25, 500)) + coord_equal() +theme_void()
+
+
+
+i <- 28
+im <- png::readPNG(paste0("/Users/speegled/Downloads/E00/Frame0", i, ".png"))
+im <- im[100:400,]
+im <- as.cimg(im)
+g <- rasterGrob(im, interpolate=TRUE) 
+p3 <- ggplot() + annotation_custom(g)+ theme_minimal()
+
+im <- cannyEdges(im, alpha = 1)
+im2 <- which(im, arr.ind = TRUE)
+myRows <- sample(nrow(im2), 200)
+#myRows <- 1:nrow(im2)
+im2[,2] <- 500 - im2[,2]
+im2 <- as.data.frame(im2)
+
+p4 <- ggplot(im2, aes(x = dim1, y = dim2)) + geom_point() + theme_minimal() + scale_y_continuous(limits = c(25, 500)) + coord_equal() +theme_void()
+cowplot::plot_grid(p1, p2, p3, p4)
+```
+
+```{r}
 
 ```
 
+When running the algorithm, we obtain the following.
+
+```{r chunk_11, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+load("circleData2.dat")
+p$plot 
+```
+
+The significant indices from the bootstrap are:
+
+```{r chunk_12, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+load("circleData2.dat")
+df1 <-  as.data.frame(p$sigindices, stringsAsFactors = FALSE)
+
+
+knitr::kable(df1, longtable = T, booktabs = T, 
+             caption = "Indices which are significant, together with their frequency.",
+             col.names = c("Index", "Freq")) 
+```
 
 # References
