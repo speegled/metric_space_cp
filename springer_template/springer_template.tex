@@ -30,7 +30,13 @@
 %% load any required packages here
 \usepackage{amsfonts} \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
-\makeatletter \def\BState{\State\hskip-\ALG@thistlm} \makeatother
+\makeatletter \def\BState{\State\hskip-\ALG@thistlm}
+\makeatother \usepackage{booktabs} \usepackage{longtable}
+\usepackage{array} \usepackage{multirow} \usepackage[table]{xcolor}
+\usepackage{wrapfig} \usepackage{float} \usepackage{colortbl}
+\usepackage{pdflscape} \usepackage{tabu} \usepackage{threeparttable}
+\usepackage{threeparttablex} \usepackage[normalem]{ulem}
+\usepackage{makecell}
 
 
 
@@ -103,7 +109,7 @@ Gaussian with mean \(\mu_1\) and variance \(\sigma\). The goal is to
 determine whether \(\mu_0 = \mu_1\), and if not, then what the value of
 \(t_0\) is.
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-1-1} \end{center}
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_1-1} \end{center}
 
 More general problems include having multiple change points, noise that
 is not Gaussian, underlying signals that are not constant, and
@@ -172,22 +178,28 @@ locate the change point, and incorrectly determines that there is no
 change. In the case that the mean increases to 1, the algorithm strongly
 indicates that the change point is at time \$t = 80.
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-3-1} \end{center}
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_3-1} \end{center}
 
-\begin{verbatim}
-## named integer(0)
-\end{verbatim}
+The following plot indicates that a change point is detected in both the
+original and the transformed data at time \(t = 80\).
 
-Note that in this case, the only time that is above the bootstrap
-significant bar is time \(t = 1\).
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_4_5-1} \end{center}
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-4-1} \end{center}
-
-\begin{verbatim}
-## indices
-## 77 78 79 80 81 
-## 11 22 42 75 29
-\end{verbatim}
+\begin{longtable}[t]{lrll}
+\caption{\label{tab:chunk_4_5}Indices which are significant, together with their frequency.}\\
+\toprule
+\multicolumn{2}{c}{Raw Data} & \multicolumn{2}{c}{Transformed Data} \\
+\cmidrule(l{2pt}r{2pt}){1-2} \cmidrule(l{2pt}r{2pt}){3-4}
+Index & Freq & Index & Freq\\
+\midrule
+77 & 13 & 78 & 11\\
+78 & 14 & 79 & 36\\
+79 & 29 & 80 & 82\\
+80 & 53 & 81 & 42\\
+81 & 21 & 82 & 8\\
+82 & 10 &  & \\
+\bottomrule
+\end{longtable}
 
 This picture gives a typical strong indication that there is a change
 point at or near time \(t = 80\), which we know is the correct value.
@@ -196,20 +208,33 @@ We note here that the \texttt{cpbaywave} algorithm also fails to detect
 a change point in the first example when using the untransformed data.
 \textbackslash{}end\{example\}
 
-Next, we consider an example that isn't locally Euclidean, but we apply
-our algorithm to it anyway.
+Next, we consider the same change point scenario as above, but we
+imagine the time series living in \(\ell_{100}^4\) rather than in
+\(\ell_{100}^2\).
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-5-1} \end{center}
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_5_5-1} \end{center}
 
-\begin{verbatim}
-## indices
-## 78 79 80 81 82 83 
-##  9 24 40 23 12 13
-\end{verbatim}
+\begin{longtable}[t]{lllr}
+\caption{\label{tab:chunk_5_75}Indices which are significant, together with their frequency.}\\
+\toprule
+\multicolumn{2}{c}{Raw Data} & \multicolumn{2}{c}{Transformed Data} \\
+\cmidrule(l{2pt}r{2pt}){1-2} \cmidrule(l{2pt}r{2pt}){3-4}
+Index & Freq & Index & Freq\\
+\midrule
+76 & 12 & 77 & 8\\
+78 & 14 & 78 & 12\\
+79 & 25 & 79 & 24\\
+80 & 35 & 80 & 57\\
+81 & 17 & 81 & 21\\
+\addlinespace
+82 & 13 & 82 & 13\\
+ &  & 83 & 13\\
+\bottomrule
+\end{longtable}
 
-In this example, we see a drop in performance associated with the change
-in metric space. Nonetheless, the algorithm is still easily able to
-detect the change point at time \(t = 80\).
+The algorithm is still easily able to detect the change point at time
+\(t = 80\), and in fact, does so better than the algorithm applied
+directly to the unstranformed data.
 
 \section{Change points in persistence diagrams}\label{sec:2}
 
@@ -225,17 +250,24 @@ circle. Any good change point detection algorithm based on persistence
 diagrams should be able to find such a change. Here are two plots of
 typical point clouds in \(\mathbb{R}^2\).
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-6-1} \end{center}
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_6-1} \end{center}
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-6-2} \end{center}
+The change point detection algorithm easily detects the change:
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-6-3} \end{center}
+\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-1-1} \end{center}
 
-\begin{verbatim}
-## indices
-## 78 79 80 81 82 
-## 27 32 69 30  8
-\end{verbatim}
+\begin{longtable}[t]{lr}
+\caption{\label{tab:unnamed-chunk-2}Indices which are significant, together with their frequency.}\\
+\toprule
+Index & Freq\\
+\midrule
+78 & 16\\
+79 & 26\\
+80 & 53\\
+81 & 53\\
+82 & 18\\
+\bottomrule
+\end{longtable}
 
 Next, we consider two circles which start out being disjoint, but one of
 the two circles passes through the other circle. From a topological
@@ -249,19 +281,31 @@ detected.
 
 Here are plots from various times in the time series.
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-7-1} \end{center}
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_7-1} \end{center}
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-7-2} \end{center}
+We see that the change point detection algorithm detects approximately
+when there are three distinct loops. Note that in this case, we only
+used 1-dimensional homology, so it would not be able to detect changes
+in clusters.
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-7-3} \end{center}
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_7_5-1} \end{center}
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-7-4} \end{center}
-
-\begin{verbatim}
-## indices
-## 41 44 45 46 47 48 49 
-## 12 30 19 21 24 12 12
-\end{verbatim}
+\begin{longtable}[t]{lr}
+\caption{\label{tab:unnamed-chunk-3}Indices which are significant, together with their frequency.}\\
+\toprule
+Index & Freq\\
+\midrule
+44 & 17\\
+45 & 19\\
+46 & 34\\
+47 & 31\\
+48 & 18\\
+\addlinespace
+49 & 19\\
+50 & 17\\
+51 & 13\\
+\bottomrule
+\end{longtable}
 
 Next, we have two examples of time series of images. In the first
 example, we examine the Archive of Many Outdoor Scenes. We picked a
@@ -280,13 +324,29 @@ randomly sample 200 points from the detected edges at each time stamp to
 form our time series of point clouds. We then applied the change point
 detection algorithm to obtain the results below.
 
-\begin{center}\includegraphics{springer_template_files/figure-latex/unnamed-chunk-10-1} \end{center}
+Here are sample images from before and after the splitting of the cell,
+together with samples from the detected edges.
 
-\begin{verbatim}
-## indices
-## 21 22 23 25 28 
-## 20 43 63 15 11
-\end{verbatim}
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_10_5-1} \end{center}
+
+When running the algorithm, we obtain the following.
+
+\begin{center}\includegraphics{springer_template_files/figure-latex/chunk_11-1} \end{center}
+
+The significant indices from the bootstrap are:
+
+\begin{longtable}[t]{lr}
+\caption{\label{tab:chunk_12}Indices which are significant, together with their frequency.}\\
+\toprule
+Index & Freq\\
+\midrule
+19 & 21\\
+21 & 13\\
+22 & 35\\
+23 & 57\\
+25 & 14\\
+\bottomrule
+\end{longtable}
 
 \section{References}\label{references}
 
