@@ -375,7 +375,7 @@ dists <- t(dists)
 pp <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE)
 ```
 
-We see that the change point detection algorithm detects approximately when there are three distinct loops. Note that in this case, we only used 1-dimensional homology, so it would not be able to detect changes in clusters. [Link here](http://stat.slu.edu/~speegle/two_circles.gif)
+We see that the change point detection algorithm detects approximately when there are three distinct loops. Note that in this case, we only used 1-dimensional homology, so it would not be able to detect changes in clusters. [Link here](http://stat.slu.edu/~speegle/Circles2.gif)
 
 ```{r chunk_7_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
 pp$plot
@@ -393,7 +393,7 @@ knitr::kable(df1, longtable = T, booktabs = T,
 
 <!-- The computation of Wasserstein distance between persistence diagrams can take quite some time when using zero dimensional homology, so we reduce to only taking 5 random pairs rather than 64 in the next computation. For that reason, we also do not bootstrap the significant indices, but rather we simply use Bayes Information Criteria, which we have found to be somewhat unreliable for data generated in this way. -->
 
-```{r chunk_8, echo = FALSE, eval = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, eval = FALSE}
+```{r chunk_888, echo = FALSE, eval = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, eval = FALSE}
 # Circles <- lapply(1:64, function(x) {
 # Circle1 <- circleUnif(30, r = 2) + rnorm(30,0,.15);
 # Circle2 <- circleUnif(50, r = 4) + 2.375 + 4*(64 - x)/64 + rnorm(50,0,.15);
@@ -423,9 +423,50 @@ knitr::kable(df1, longtable = T, booktabs = T,
 # bootJLDetectChangePoint(dists, rotate_xaxis = TRUE)$sigindices
 ```
 
-Next, we have two examples of time series of images. In the first example, we examine the Archive of Many Outdoor Scenes. We picked a camera that was taking pictures of Table Mountain from Bloubergstrand in South Africa. For each day, we averaged all of the pictures that were taken on that day. We then used edge detection to extract edges from the pictures, and we removed the time stamp. Finally, we randomly sampled points from the detected edges of the pictures to use as our point cloud. So, the time series consists of randomly sampled points from edges of the average of all pictures on 128 consecutive days. 
+Next, we have two examples of time series of images. In the first example, we examine the Archive of Many Outdoor Scenes. We picked a camera that was taking pictures of Table Mountain from Bloubergstrand in South Africa. For each day, we averaged all of the pictures that were taken on that day. We then used edge detection to extract edges from the pictures, and we removed the time stamp. Finally, we randomly sampled points from the detected edges of the pictures to use as our point cloud. So, the time series consists of randomly sampled points from edges of the average of all pictures on 64 consecutive days. The original averaged images are [here](http://stat.slu.edu/~speegle/Kaapstad.gif) and the sampled edges are [here](http://stat.slu.edu/~speegle/Slide4.gif)
 
-In the next, we have a series of images of a cell, which divides at about time $t = 23$ [link here](http://stat.slu.edu/~speegle/cellsRaw.gif). We use the \texttt{cannyEdges} function in the \texttt{imager} R package to detect the edges of the cells. We then randomly sample 200 points from the detected edges at each time stamp to form our time series of point clouds [see results](http://stat/slu.edu/~speegle/mycells2.gif). We then applied the change point detection algorithm to obtain the results below.
+```{r, echo = FALSE, eval = FALSE}
+load("/Users/speegled/brussels2017talk/July3KaapEdges.dat")
+library(animation)
+oopt = ani.options(interval = .2)
+saveGIF({for (i in 1:90) {
+  g<-plot(sampleEdges[[i]], axes = FALSE, xlab = "", ylab = "", main = paste0("Time ", i))
+  print(g)
+} }, movie.name="Slide4.gif",ani.width = 840, ani.height =450)
+```
+
+```{r chunk_last, cache = TRUE, eval = FALSE, echo = FALSE}
+load("/Users/speegled/brussels2017talk/July3KaapEdges.dat")
+N <- 64
+Diags <- lapply(1:N, function(i) ripsDiag(X = sampleEdges[[i]],
+                                           maxdimension,
+                                           maxscale,
+                                           library = "GUDHI",
+                                           printProgress = FALSE) )
+
+dists <- matrix(1:(N*N), ncol = N)
+for(i in 1:N) {
+  coord <- sample(N, 2)
+  A <- Diags[[coord[1]]][[1]]
+  B <- Diags[[coord[2]]][[1]]
+  den <- wasserstein(A, B, p = 1)
+  for(j in 1:N) {
+    dists[i,j] <- (wasserstein(A, Diags[[j]][[1]], p = 1)^2 - wasserstein(B, Diags[[j]][[1]], p = 1)^2)/den
+  }
+}
+dists <- t(dists) 
+pp_last <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE)
+save(pp_last, file = "pp_last.dat")
+```
+
+```{r chunk_8, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center"}
+load("pp_last.dat")
+pp_last$plot
+```
+
+In this case, there is one bootstrap significant index of time $t = 63$. However, it is unlikely that this is a significant change point; more likely is that the extension of the time series in required by \texttt{cpbaywave} caused the issue.
+
+In the next, we have a series of images of a cell, which divides at about time $t = 23$ [link here](http://stat.slu.edu/~speegle/cellsRaw.gif). We use the \texttt{cannyEdges} function in the \texttt{imager} R package to detect the edges of the cells. We then randomly sample 200 points from the detected edges at each time stamp to form our time series of point clouds [see results](http://stat.slu.edu/~speegle/mycells2.gif). We then applied the change point detection algorithm to obtain the results below.
 
 ```{r chunk_9, echo = FALSE, eval = FALSE}
 set.seed(07042017)
