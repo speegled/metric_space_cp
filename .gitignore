@@ -1,0 +1,7 @@
+.DS_Store
+.Rproj.user
+*.gz
+*.log
+*.aux
+E00*
+springer_template/springer_template_c*
