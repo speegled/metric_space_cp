@@ -179,7 +179,7 @@ df2 <- as.data.frame(raw_change_one$sigindices, stringsAsFactors = FALSE)
 
 df_kable <- dplyr::mutate(df2, Index2 = df1[,1], Freq2 = df1[,2]) 
 knitr::kable(df_kable, longtable = T, booktabs = T, 
-             caption = "Indices which are significant, together with their frequency.",
+             caption = "Indices which are significant, together with their frequency. True change point at t = 80.",
              col.names = c("Index", "Freq", "Index" ,"Freq")) %>% 
    add_header_above(c("Raw Data" = 2, "Transformed Data" = 2))
 ```
@@ -328,7 +328,7 @@ df1 <-  as.data.frame(p$sigindices, stringsAsFactors = FALSE)
 
 
 knitr::kable(df1, longtable = T, booktabs = T, 
-             caption = "Indices which are significant, together with their frequency.",
+             caption = "Indices which are significant, together with their frequency. True change point at t = 80.",
              col.names = c("Index", "Freq")) 
 ```
 
@@ -386,7 +386,7 @@ df1 <-  as.data.frame(pp$sigindices, stringsAsFactors = FALSE)
 
 
 knitr::kable(df1, longtable = T, booktabs = T, 
-             caption = "Indices which are significant, together with their frequency.",
+             caption = "Indices which are significant, together with their frequency. True change point ambiguous.",
              col.names = c("Index", "Freq")) 
 ```
 
@@ -546,7 +546,7 @@ df1 <-  as.data.frame(p$sigindices, stringsAsFactors = FALSE)
 
 
 knitr::kable(df1, longtable = T, booktabs = T, 
-             caption = "Indices which are significant, together with their frequency.",
+             caption = "Indices which are significant, together with their frequency. True change point at time t = 23",
              col.names = c("Index", "Freq")) 
 ```
 
