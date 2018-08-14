@@ -4,3 +4,8 @@ cpbaywave
 TDA
 dplyr
 boot
+cowplot
+bindrcpp
+magrittr
+imager
+kableExtra
