@@ -45,6 +45,7 @@ preamble:
   \usepackage[normalem]{ulem}
   \usepackage{makecell}
 
+
 #PACS: 
 #- PAC1
 #- superPAC
@@ -65,7 +66,7 @@ output: rticles::springer_article
 
 A simple change point detection problem is the following: suppose that $(x_t)_{t = 1}^{t_0}$ are iid Gaussian random variables with mean $\mu_0$ and variance $\sigma$, and $(x_t)_{t = t_0 + 1}^N$ are iid Gaussian with mean $\mu_1$ and variance $\sigma$. The goal is to determine whether $\mu_0 = \mu_1$, and if not, then what the value of $t_0$ is. 
 
-```{r chunk_1, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", message = FALSE}
+```{r chunk_1, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", message = FALSE}
 set.seed(1)
 dat <- data.frame(t = 1:64, y = c(rnorm(30), rnorm(34, 2, 1)))
 library(ggplot2)
@@ -148,26 +149,28 @@ dists_2 <- t(dists_2)
 
 ```
 
-```{r chunk_2_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_2_5, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 change_of_point1 <- cpbaywave::bootJLDetectChangePoint(dists_1, rotate_xaxis = TRUE, returnPlot = TRUE)
 ```
 
 
-```{r chunk_3, echo = FALSE, message=FALSE, fig.height = 3, fig.width = 5, fig.align = "center",  cache = TRUE}
+```{r chunk_3, echo = FALSE, message=FALSE, fig.height = 2.3, fig.width = 5, fig.align = "center",  cache = TRUE}
 library(cowplot)
 p <- plot_grid(raw_change_point1$plot, change_of_point1$plot, labels = c("A", "B"), align = "h") 
-title <- ggdraw() + draw_label("Most Likely Indices of Change Points")
-plot_grid(title, p, ncol = 1, rel_heights = c(0.1,1))
+title <- ggdraw() + 
+  draw_label("Most Likely Indices of Change Points") 
+
+plot_grid(title, p, ncol = 1, rel_heights = c(0.1,1,2))  
 ```
 
 
-```{r chunk_4, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_4, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 change_of_one <- cpbaywave::bootJLDetectChangePoint(dists_2, returnPlot = TRUE, rotate_xaxis = TRUE)
 ```
 
 The following plot indicates that a change point is detected in both the original and the transformed data at time $t = 80$. 
 
-```{r chunk_4_5, echo = FALSE, message=FALSE, fig.height = 3, fig.width = 5, fig.align = "center",  cache = TRUE}
+```{r chunk_4_5, echo = FALSE, message=FALSE, fig.height = 2.3, fig.width = 5, fig.align = "center",  cache = TRUE}
 library(cowplot)
 p <- plot_grid(raw_change_one$plot, change_of_one$plot, labels = c("A", "B"), align = "h") 
 title <- ggdraw() + draw_label("Most Likely Indices of Change Points")
@@ -192,7 +195,7 @@ We note here that the \texttt{cpbaywave} algorithm also fails to detect a change
 
 Next, we consider the same change point scenario as above, but we imagine the time series living in $\ell_{100}^4$ rather than in $\ell_{100}^2$. 
 
-```{r chunk_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_5, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 dd_2 <- function(x,y) {
   sum((x-y)^4)^1/4
 }
@@ -215,7 +218,7 @@ change_one <- bootJLDetectChangePoint(dists_3, rotate_xaxis = TRUE, returnPlot =
 
 ```
 
-```{r chunk_5_5, echo = FALSE, message=FALSE, fig.height = 3, fig.width = 5, fig.align = "center",  cache = TRUE}
+```{r chunk_5_5, echo = FALSE, message=FALSE, fig.height = 2.3, fig.width = 5, fig.align = "center",  cache = TRUE}
 library(cowplot)
 p <- plot_grid(raw_change_one$plot, change_one$plot, labels = c("A", "B"), align = "h") 
 title <- ggdraw() + draw_label("Most Likely Indices of Change Points")
@@ -268,7 +271,7 @@ The space of persistence diagrams is not locally isometric to Euclidean space. H
 
 Our first example is a proof of concept. We start with a single circle, sampled randomly, and then at time $t = 80$, we add a second disjoint circle. Any good change point detection algorithm based on persistence diagrams should be able to find such a change. Here are two plots of typical point clouds in $\mathbb{R}^2$.
 
-```{r chunk_6, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+```{r chunk_6, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE, message = FALSE}
 library(TDA)
 library(cpbaywave)
 library(dplyr)
@@ -319,11 +322,11 @@ p <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE)
 ```
 
 The change point detection algorithm easily detects the change:
-```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+```{r, echo = FALSE,fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE, message = FALSE}
 p$plot
 ```
 
-```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+```{r, echo = FALSE,fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE, message = FALSE}
 df1 <-  as.data.frame(p$sigindices, stringsAsFactors = FALSE)
 
 
@@ -337,7 +340,7 @@ Next, we consider two circles which start out being disjoint, but one of the two
 
 Here are plots from various times in the time series.
 
-```{r chunk_7, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_7, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 Circles <- lapply(1:64, function(x) {
 Circle1 <- circleUnif(60, r = 2) + rnorm(120,0,.15);
 Circle2 <- circleUnif(100, r = 4) + 2.375 + 4*(64 - x)/64 + rnorm(200,0,.15);
@@ -377,11 +380,11 @@ pp <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE)
 
 We see that the change point detection algorithm detects approximately when there are three distinct loops. Note that in this case, we only used 1-dimensional homology, so it would not be able to detect changes in clusters. [Link here](http://stat.slu.edu/~speegle/Circles2.gif)
 
-```{r chunk_7_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_7_5, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 pp$plot
 ```
 
-```{r, echo = FALSE,fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message = FALSE}
+```{r, echo = FALSE,fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE, message = FALSE}
 df1 <-  as.data.frame(pp$sigindices, stringsAsFactors = FALSE)
 
 
@@ -393,7 +396,7 @@ knitr::kable(df1, longtable = T, booktabs = T,
 
 <!-- The computation of Wasserstein distance between persistence diagrams can take quite some time when using zero dimensional homology, so we reduce to only taking 5 random pairs rather than 64 in the next computation. For that reason, we also do not bootstrap the significant indices, but rather we simply use Bayes Information Criteria, which we have found to be somewhat unreliable for data generated in this way. -->
 
-```{r chunk_888, echo = FALSE, eval = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, eval = FALSE}
+```{r chunk_888, echo = FALSE, eval = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE, eval = FALSE}
 # Circles <- lapply(1:64, function(x) {
 # Circle1 <- circleUnif(30, r = 2) + rnorm(30,0,.15);
 # Circle2 <- circleUnif(50, r = 4) + 2.375 + 4*(64 - x)/64 + rnorm(50,0,.15);
@@ -459,7 +462,7 @@ pp_last <- bootJLDetectChangePoint(dists, rotate_xaxis = TRUE, returnPlot = TRUE
 save(pp_last, file = "pp_last.dat")
 ```
 
-```{r chunk_8, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center"}
+```{r chunk_8, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center"}
 load("pp_last.dat")
 pp_last$plot
 ```
@@ -503,7 +506,7 @@ for(i in 1:listLen)
 save(circs, file = "circleData.dat")
 ```
 
-```{r chunk_10, echo = FALSE, eval = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_10, echo = FALSE, eval = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 load("circleData.dat")
 Circles <- circs
 N <- 64
@@ -530,7 +533,7 @@ save(list = c("circs", "dists", "p"), file = "circleData2.dat")
 ```
 
 Here are sample images from before and after the splitting of the cell, together with samples from the detected edges.
-```{r chunk_10_5, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE, message=FALSE}
+```{r chunk_10_5, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE, message=FALSE}
 i <- 1
    library(grid)
 library(imager)
@@ -574,14 +577,14 @@ cowplot::plot_grid(p1, p2, p3, p4)
 
 When running the algorithm, we obtain the following.
 
-```{r chunk_11, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_11, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 load("circleData2.dat")
 p$plot 
 ```
 
 The significant indices from the bootstrap are:
 
-```{r chunk_12, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center", cache = TRUE}
+```{r chunk_12, echo = FALSE, fig.height = 2.3, fig.width = 4, fig.align = "center", cache = TRUE}
 load("circleData2.dat")
 df1 <-  as.data.frame(p$sigindices, stringsAsFactors = FALSE)
 

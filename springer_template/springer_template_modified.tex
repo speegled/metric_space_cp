@@ -21,7 +21,7 @@
 % etc.
 %
 % please place your own definitions here and don't use \def but
-% \newcommand{}{}
+\newcommand{\R}{\mathbb{R}}
 %
 % Insert the name of "your journal" with
 % \journalname{myjournal}
@@ -127,8 +127,67 @@ estimate it.
 
 Our motivation is that we wish to find change points in time series of
 \textbf{persistence diagrams}. Persistence diagrams are a way of
-measuring the topological structure of a point cloud in Euclidean space.
-More here.
+measuring the topological structure of a point cloud in Euclidean space.  Given a collection of points $\{x_1,\ldots,x_M\} \subset \R^N$ and an $\alpha > 0$, we create a Rips complex that consists of all subsets of $A \subset \{x_1,\ldots, x_M\}$ that have the property that $\max \{d(x,y) : x,y \in A\} < \alpha$. For each $\alpha > 0$, we then compute the simplicial homology of the Rips complex. Features in the simplicial homology can be associated with a birth time (the smallest $\alpha$ for which the feature appears) and a death time (the largest $alpha$ for which the feature appears). Inituitively, features that have a large difference between birth and death time are more likely to be intrinsic to the point cloud than features that only persist over a small interval. 
+
+For example, consider the collection of points in $\mathbb{R}^2$ shown below. A .gif showing the Rips filtration of the point clouds can be found \href{http://stat.slu.edu/~speegle/Rips.gif}{here}. There are 18 connected components when $\alpha$ is very small, and as $\alpha$ increases, there are fewer and fewer until finally at $\alpha = 0.8$, there is only one. A loop forms when $\alpha = 1$ and persists until $\alpha = 1.4$. These facts are demonstrated in Figure \ref{fig:circle}. 
+
+\begin{figure}[H]
+\includegraphics[width=\columnwidth]{springer_template_files/figure-latex/rips_circle}
+\caption{Important diameters of the Rips filtration of a point cloud sampled from a circle}
+ \label{fig:circle}\end{figure}
+
+Based on Figure \ref{fig:circle}, we would expect that three components would have death time less than 0.1, that all components except one wil have died by time 0.8, that a loop will appear before time 1, and that the loop will die before time 1.3. 
+
+Using the \texttt{ripsDiag} function of the \texttt{TDA} R package, we can see that, indeed, the first three death times are 005, 0.08 and 0.08, the last death time of a connected component is 0.73, and the birth and death times of the loop are 0.97 and 1.28, respectively. The full persistence diagram is given in Table \ref{tab:circle}.
+
+\begin{longtable}[t]{r|r|r}
+\caption{\label{tab:circle}Birth and death times of zero dimensional and one dimensional features.}\\
+\hline
+dimension & Birth & Death\\
+\hline
+0 & 0.00 & 5.00\\
+\hline
+0 & 0.00 & 0.73\\
+\hline
+0 & 0.00 & 0.69\\
+\hline
+0 & 0.00 & 0.48\\
+\hline
+0 & 0.00 & 0.47\\
+\hline
+0 & 0.00 & 0.47\\
+\hline
+0 & 0.00 & 0.47\\
+\hline
+0 & 0.00 & 0.46\\
+\hline
+0 & 0.00 & 0.46\\
+\hline
+0 & 0.00 & 0.38\\
+\hline
+0 & 0.00 & 0.36\\
+\hline
+0 & 0.00 & 0.32\\
+\hline
+0 & 0.00 & 0.28\\
+\hline
+0 & 0.00 & 0.18\\
+\hline
+0 & 0.00 & 0.16\\
+\hline
+0 & 0.00 & 0.08\\
+\hline
+0 & 0.00 & 0.08\\
+\hline
+0 & 0.00 & 0.05\\
+\hline
+0 & 0.00 & 0.00\\
+\hline
+1 & 0.97 & 1.28\\
+\hline
+\end{longtable}
+
+We will use the bottleneck or Wasserstein distances on persistence diagrams. We refer to \cite{??} for details.
 
 \section{Metric space change point detection algorithm}\label{sec:1}
 
@@ -144,7 +203,7 @@ preserve the change point, see Algorithm \ref{euclid}.
 \Procedure{MyProcedure}{}
 \State $\textit{time\_length} \gets \text{length of }\textit{time\_series}$
 \State $i \gets 1$
-\While {$\textit{i < time\_length}$}
+\While {\textit{i} $<$ \textit{time\_length}}
 \State $\textit{A, B} \gets \text{sample(N, 2, replace = FALSE)}$
 \For {$j \gets 1:time\_length$}
 \State $\textit{dists[j,i]} \gets (d(A, x_j)^2 - d(B, x_j)^2)/d(A, B)$
@@ -205,8 +264,6 @@ Index & Freq & Index & Freq\\
 This picture gives a typical strong indication that there is a change
 point at or near time \(t = 80\), which we know is the correct value.
 
-We note here that the \texttt{cpbaywave} algorithm also fails to detect
-a change point in the first example when using the untransformed data.
 \end{example}
 
 \begin{example} Next, we consider a change in mean from $\mu = 0$ to $\mu = 1$ at time $t = 80$, as above, but we imagine the time series living in \(\ell_{4}^{100}\) rather than in \(\ell_{2}^{100}\). Since $\ell_{4}^{100}$ is not locally Euclidean, this example is testing the robustness of our algorithm to our assumptions. As can be seen in Figure \ref{fig:4} and Table \ref{tab:chunk_5_75}, the change point is detected in the raw data (which we had already seen in Example \ref{ex:1}) as well as the transormed data. Thus, our algorithm appears to have some robustness to non-Euclidean metric spaces.
@@ -288,7 +345,7 @@ when three distinct loops become show in the time series. Note that in this case
 used 1-dimensional homology in our distance calculation, so our algorithm would not be able to detect changes
 in clusters. 
 
-\begin{figure}\includegraphics{springer_template_files/figure-latex/chunk_7_5-1} 
+\begin{figure}[H]\includegraphics{springer_template_files/figure-latex/chunk_7_5-1} 
 \caption{When two circles move through each other, a topological change is detected when the third loop becomes prominent, at or about time $t = 46$.}
 \label{fig:8}\end{figure}
 
@@ -349,13 +406,13 @@ then applied Algorithm \ref{algo:1} to detect change points.
 \caption{Raw image of cells before and after dividing, together with edge detection.}
 \label{fig:10}\end{figure}
 
-In Figure \ref{fig:11}, we see good evidence of a change near the time $t = 23$, which was estimated to be the correct time by the authors. 
+In Figure \ref{fig:11}, we see good evidence of a change near the time $t = 23$, which was estimated to be the correct time by the authors of this paper. 
 
 \begin{figure}[H]\includegraphics{springer_template_files/figure-latex/chunk_11-1} 
 \caption{Detects change at or around time $t = 23$.}
 \label{fig:11}\end{figure}
 
-Table \ref{tab:chunk_12} shows the significant indices from the bootstrap. There are more than would be ideal, but the change points do at least tend to cluster around the correct value, indicating that there is something of intereste at or near those points.
+Table \ref{tab:chunk_12} shows the significant indices from the bootstrap. There are more than would be ideal, but the change points do at least tend to cluster around the correct value, indicating that there is something of interest at or near those points.
 
 \begin{longtable}[t]{lr}
 \caption{\label{tab:chunk_12}Indices which are significant, together with their frequency. True change point at time t = 23}\\
