@@ -1,0 +1,8 @@
+%s/\\and[\s\n\r ]*}/}/
+
+%s/\\begin{center}/qqq/g
+%s/qqq/\\begin{figure*}/g
+%s/\\end{center}/\\end{figure*}
+%s/\\end{figure\*}/qqq\\end{figure*}/g
+let i=1 | g/qqq/s//\='\label{fig:'.i/ | let i=i+1
+%s/fig:[0-9]*/\0}/g
